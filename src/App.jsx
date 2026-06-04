@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 
 const COUNTDOWN_SECONDS = 10;
 const TOTAL_MAGICAL_PARTICLES = 35;
+// توليد 40 جزيء دخان متصاعد لتشكيل طبقة دخان كثيفة
+const TOTAL_SMOKE_PARTICLES = 40; 
 
 export default function App() {
   const [hasStarted, setHasStarted] = useState(false);
@@ -9,10 +11,11 @@ export default function App() {
   const [phase, setPhase] = useState('IDLE');
   const [particles, setParticles] = useState([]);
   const [sparks, setSparks] = useState([]);
+  const [smokeParticles, setSmokeParticles] = useState([]);
   
   const audioCtxRef = useRef(null);
   const bgMusicRef = useRef(null);
-  const laughAudioRef = useRef(null); // إضافة مرجع لصوت الضحكة الكوميدية
+  const laughAudioRef = useRef(null);
 
   const initAudio = () => {
     if (bgMusicRef.current) {
@@ -20,7 +23,6 @@ export default function App() {
       bgMusicRef.current.play().catch(e => console.log("Audio play blocked:", e));
     }
     
-    // فك حظر صوت الضحكة في الخلفية ليعمل لاحقاً بدون مشاكل
     if (laughAudioRef.current) {
       laughAudioRef.current.volume = 0.01;
       const playPromise = laughAudioRef.current.play();
@@ -119,6 +121,8 @@ export default function App() {
     
     if (phase === 'GROWING') {
       swellMusic(true);
+      
+      // جزيئات سحرية
       const newParticles = Array.from({ length: TOTAL_MAGICAL_PARTICLES }).map((_, i) => ({
         id: i,
         x: 30 + Math.random() * 40,
@@ -128,6 +132,18 @@ export default function App() {
         size: 1.5 + Math.random() * 3
       }));
       setParticles(newParticles);
+
+      // توليد جزيئات الدخان الكثيف المتحرك برمجياً لحجب الصورة
+      const smokes = Array.from({ length: TOTAL_SMOKE_PARTICLES }).map((_, i) => ({
+        id: i,
+        x: 15 + Math.random() * 70, // توزيع عرضي يغطي كامل مساحة الصورة
+        y: 80 + Math.random() * 20, // تبدأ من الأسفل وتتصاعد
+        size: 120 + Math.random() * 100, // أحجام ضخمة لدمج الدخان وتكثيفه
+        delay: Math.random() * 5,
+        duration: 6 + Math.random() * 4,
+        drift: (Math.random() - 0.5) * 60 // حركة يميناً ويساراً أثناء الصعود
+      }));
+      setSmokeParticles(smokes);
       
       const t2 = setTimeout(() => setPhase('FINISHED'), 15000);
       return () => clearTimeout(t2);
@@ -135,7 +151,6 @@ export default function App() {
     
     if (phase === 'FINISHED') {
       swellMusic(false); 
-      // إطلاق صوت الضحكة العالية فوراً لمجرد اكتمال النمو
       if (laughAudioRef.current) {
         laughAudioRef.current.volume = 1.0;
         laughAudioRef.current.play().catch(e => console.log(e));
@@ -155,7 +170,6 @@ export default function App() {
         preload="auto"
       />
       
-      {/* ملف صوت الضحكة الكوميدية */}
       <audio 
         ref={laughAudioRef} 
         src="https://actions.google.com/sounds/v1/human_voices/comedy_laugh.ogg" 
@@ -164,7 +178,6 @@ export default function App() {
 
       <style dangerouslySetInnerHTML={{__html: `
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Montserrat:wght@300;400;500&family=Aref+Ruqaa:wght@400;700&family=Great+Vibes&display=swap');
-
         .font-gold-serif { font-family: 'Cinzel', serif; }
         .font-gold-sans { font-family: 'Montserrat', sans-serif; }
         .font-arabic-royal { font-family: 'Aref Ruqaa', serif; }
@@ -182,11 +195,13 @@ export default function App() {
           100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
         }
 
-        @keyframes scan-up {
-          0% { bottom: 0%; opacity: 0; transform: translateX(-50%) scale(0.5); }
-          5% { opacity: 1; transform: translateX(-50%) scale(1); }
-          95% { opacity: 1; transform: translateX(-50%) scale(1.1); }
-          100% { bottom: 100%; opacity: 0; transform: translateX(-50%) scale(0.5); }
+        /* حركة تصاعد الدخان والتفافه بشكل طبيعي وكثيف */
+        @keyframes smoke-billow-up {
+          0% { transform: translate(0, 0) scale(0.6) rotate(0deg); opacity: 0; }
+          15% { opacity: 0.85; filter: blur(25px); }
+          50% { opacity: 0.95; filter: blur(35px); }
+          85% { opacity: 0.85; filter: blur(40px); }
+          100% { transform: translate(var(--mdrift), -500px) scale(1.5) rotate(180deg); opacity: 0; }
         }
 
         .image-reveal {
@@ -224,36 +239,13 @@ export default function App() {
           100% { opacity: 1; transform: translateY(0); }
         }
         
-        @keyframes fade-in-simple {
-          0% { opacity: 0; }
-          100% { opacity: 1; }
-        }
+        @keyframes fade-in-simple { 0% { opacity: 0; } 100% { opacity: 1; } }
         
         @keyframes gentle-pulse {
           0%, 100% { transform: scale(1); text-shadow: 0 0 10px rgba(212,175,55,0.5); }
           50% { transform: scale(1.05); text-shadow: 0 0 20px rgba(212,175,55,1); }
         }
         .animate-gentle-pulse { animation: gentle-pulse 2.5s ease-in-out infinite; }
-
-        /* ستايلات الدخان الكثيف الذي يغطي الصورة */
-        .thick-smoke-overlay {
-          position: absolute;
-          inset: -50%;
-          background: 
-            radial-gradient(circle at 35% 35%, rgba(180, 180, 180, 1) 20%, transparent 50%),
-            radial-gradient(circle at 65% 65%, rgba(200, 200, 200, 1) 20%, transparent 50%),
-            radial-gradient(circle at 50% 50%, rgba(220, 220, 220, 1) 30%, transparent 60%),
-            radial-gradient(circle at 20% 70%, rgba(150, 150, 150, 1) 25%, transparent 55%),
-            radial-gradient(circle at 80% 30%, rgba(160, 160, 160, 1) 25%, transparent 55%);
-          filter: blur(35px);
-          animation: smoke-billow 15s linear forwards;
-        }
-
-        @keyframes smoke-billow {
-          0% { opacity: 0; transform: scale(0.8) translateY(5%); }
-          3% { opacity: 1; transform: scale(1) translateY(0); }
-          100% { opacity: 1; transform: scale(1.3) translateY(-5%); }
-        }
       `}} />
 
       {!hasStarted && (
@@ -262,12 +254,9 @@ export default function App() {
             onClick={handleBegin}
             className="relative px-12 py-6 overflow-hidden group bg-gradient-to-b from-[#1a1505] to-[#0a0802] border-2 border-[#d4af37]/60 hover:border-[#d4af37] transition-all duration-700 shadow-[0_0_30px_rgba(212,175,55,0.2)] hover:shadow-[0_0_60px_rgba(212,175,55,0.6)] rounded-lg cursor-pointer"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#d4af37]/30 to-transparent -translate-x-full group-hover:translate-x-full duration-[1500ms] ease-in-out"></div>
-            <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#fcf4ba] via-[#d4af37] to-[#9e7a17] font-arabic-royal text-3xl md:text-5xl font-bold animate-gentle-pulse inline-block px-4 pt-2">
+            <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#fcf4ba] via-[#d4af37] to-[#9e7a17] font-arabic-royal text-3xl md:text-5xl font-bold animate-gentle-pulse">
               اِضْغَطْ يَا حُلْوُ
             </span>
-            <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[#d4af37] opacity-50 group-hover:opacity-100 transition-opacity duration-700 rounded-tl-lg"></div>
-            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[#d4af37] opacity-50 group-hover:opacity-100 transition-opacity duration-700 rounded-br-lg"></div>
           </button>
         </div>
       )}
@@ -296,51 +285,38 @@ export default function App() {
       <div className={`absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-[2500ms] ${phase === 'COUNTDOWN' || phase === 'TRANSITION' || phase === 'IDLE' ? 'opacity-0' : 'opacity-100'}`}>
         <div className="relative w-full max-w-[600px] h-full flex flex-col items-center justify-center mt-[-10vh]">
           
-          <div className="relative flex justify-center w-full">
+          <div className="relative flex justify-center w-full h-full items-center">
             <img 
               src="/rose.png" 
               alt="Rose" 
-              className={`w-full h-auto max-h-[75vh] object-contain image-reveal drop-shadow-[0_20px_40px_rgba(0,0,0,0.9)]
-                ${phase === 'GROWING' || phase === 'FINISHED' ? 'revealed' : ''}
-                ${phase === 'FINISHED' ? 'image-breathe-anim' : ''}
-              `}
+              className={`w-full h-auto max-h-[75vh] object-contain image-reveal ${phase === 'GROWING' || phase === 'FINISHED' ? 'revealed' : ''} ${phase === 'FINISHED' ? 'image-breathe-anim' : ''}`}
             />
             
+            {/* مؤثر الدخان البرمجي الكثيف والمتحرك فوق صورة الوردة مباشرة ليحجبها كلياً */}
             {phase === 'GROWING' && (
-              <div 
-                className="absolute z-20 pointer-events-none mix-blend-screen"
-                style={{
-                  left: '50%',
-                  width: '180px',
-                  height: '24px',
-                  background: 'radial-gradient(ellipse at center, rgba(255, 232, 133, 1) 0%, rgba(212, 175, 55, 0.6) 40%, transparent 70%)',
-                  animation: 'scan-up 15s linear forwards',
-                  filter: 'blur(3px)'
-                }}
-              />
+              <div className="absolute inset-0 z-40 pointer-events-none overflow-hidden flex justify-center items-center">
+                {smokeParticles.map((smk) => (
+                  <div
+                    key={smk.id}
+                    className="absolute rounded-full pointer-events-none"
+                    style={{
+                      left: `${smk.x}%`,
+                      bottom: `${100 - smk.y}%`,
+                      width: `${smk.size}px`,
+                      height: `${smk.size}px`,
+                      // خليط لوني من تدرجات الدخان الرمادي والأبيض ليعطي كثافة وواقعية للمظهر
+                      background: smk.id % 2 === 0 
+                        ? 'radial-gradient(circle, rgba(220,220,220,0.9) 0%, rgba(140,140,140,0.4) 50%, transparent 70%)'
+                        : 'radial-gradient(circle, rgba(245,245,245,0.85) 0%, rgba(160,160,160,0.35) 50%, transparent 70%)',
+                      '--mdrift': `${smk.drift}px`,
+                      animation: `smoke-billow-up ${smk.duration}s linear infinite`,
+                      animationDelay: `${smk.delay}s`,
+                    }}
+                  />
+                ))}
+              </div>
             )}
           </div>
-
-          {/* طبقة الدخان الكثيف تظهر فقط في مرحلة النمو وتختفي فجأة بعدها */}
-          {phase === 'GROWING' && (
-            <div className="absolute inset-0 z-[100] pointer-events-none overflow-hidden flex justify-center items-center">
-              <div className="thick-smoke-overlay"></div>
-            </div>
-          )}
-
-          {phase === 'GROWING' && particles.map((p) => (
-            <div
-              key={p.id}
-              className="absolute rounded-full bg-[#d4af37] blur-[1px] pointer-events-none"
-              style={{
-                left: `${p.x}%`, top: `${p.y}%`,
-                width: `${p.size}px`, height: `${p.size}px`,
-                animation: `float-up ${p.duration}s ease-out forwards`,
-                animationDelay: `${p.delay}s`,
-                boxShadow: '0 0 15px 4px rgba(212, 175, 55, 0.4)'
-              }}
-            />
-          ))}
         </div>
       </div>
 
