@@ -15,8 +15,8 @@ export default function App() {
 
   const initAudio = () => {
     if (bgMusicRef.current) {
-      // رفع صوت الموسيقى الأساسي ليكون عالياً وواضحاً (90%)
-      bgMusicRef.current.volume = 0.9; 
+      // رفع صوت الموسيقى الأساسي ليكون عالياً بأقصى درجة (100%)
+      bgMusicRef.current.volume = 1.0; 
       bgMusicRef.current.play().catch(e => console.log("Audio play blocked:", e));
     }
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -46,13 +46,13 @@ export default function App() {
 
   const swellMusic = (peak) => {
     if (bgMusicRef.current) {
-      // تصل لـ 100% في الذروة، وتنخفض لـ 90% بعدها
-      const targetVolume = peak ? 1.0 : 0.9; 
-      const step = peak ? 0.01 : -0.01;
+      // تثبيت الصوت على أعلى درجة 1.0 في كل الحالات لضمان علو الموسيقى
+      const targetVolume = 1.0; 
+      const step = 0.01;
       const fadeInterval = setInterval(() => {
         let newVol = bgMusicRef.current.volume + step;
-        if ((peak && newVol >= targetVolume) || (!peak && newVol <= targetVolume)) {
-          bgMusicRef.current.volume = Math.max(0, Math.min(1, targetVolume));
+        if (newVol >= targetVolume) {
+          bgMusicRef.current.volume = 1.0;
           clearInterval(fadeInterval);
         } else {
           bgMusicRef.current.volume = Math.max(0, Math.min(1, newVol));
@@ -85,7 +85,6 @@ export default function App() {
         setTimeLeft((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            // تم حذف الصوت المزعج عند الانتقال
             setPhase('TRANSITION');
             return 0;
           }
@@ -113,12 +112,13 @@ export default function App() {
         x: 30 + Math.random() * 40,
         y: 20 + Math.random() * 60,
         delay: Math.random() * 3,
-        duration: 4 + Math.random() * 5,
+        duration: 6 + Math.random() * 5,
         size: 1.5 + Math.random() * 3
       }));
       setParticles(newParticles);
       
-      const t2 = setTimeout(() => setPhase('FINISHED'), 6500);
+      // زيادة وقت النمو ليكون أبطأ (9.5 ثوانٍ)
+      const t2 = setTimeout(() => setPhase('FINISHED'), 9500);
       return () => clearTimeout(t2);
     }
     
@@ -130,7 +130,8 @@ export default function App() {
   const isAnticipation = phase === 'COUNTDOWN' && timeLeft <= 3;
 
   return (
-    <div className="relative w-screen h-screen bg-[#070707] overflow-hidden flex flex-col items-center justify-center selection:bg-transparent">
+    // تم تغيير لون الخلفية إلى bg-black ليتطابق مع خلفية الوردة تماماً دون أي حواف
+    <div className="relative w-screen h-screen bg-black overflow-hidden flex flex-col items-center justify-center selection:bg-transparent">
       
       <audio 
         ref={bgMusicRef} 
@@ -161,7 +162,8 @@ export default function App() {
           clip-path: inset(100% 0 0 0);
           filter: brightness(0.2) contrast(1.2);
           transform: scale(0.95);
-          transition: all 6s cubic-bezier(0.25, 1, 0.5, 1);
+          /* زيادة فترة حركة الوردة لتتناسب مع التوقيت الجديد للنمو البطيء */
+          transition: all 9s cubic-bezier(0.25, 1, 0.5, 1);
         }
         .image-reveal.revealed {
           clip-path: inset(0 0 0 0);
@@ -194,7 +196,7 @@ export default function App() {
         .reveal-wrapper { animation: cinematic-reveal-text 4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       `}} />
 
-      {/* شاشة البداية مع الزر الفاخر الجديد */}
+      {/* شاشة البداية مع الزر الفاخر */}
       {!hasStarted && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm transition-opacity duration-1000">
           <button 
@@ -292,7 +294,7 @@ export default function App() {
             </div>
             
             <h1 className="font-gold-serif font-medium text-6xl md:text-[6rem] uppercase tracking-[0.2em] md:tracking-[0.25em] ml-[0.2em] md:ml-[0.25em] gold-text-gradient">
-              Shahd
+              Sabah
             </h1>
             
             <div className="flex items-center justify-center gap-2 mt-2 opacity-80">
