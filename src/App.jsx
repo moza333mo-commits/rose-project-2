@@ -101,7 +101,7 @@ export default function App() {
     }
     
     if (phase === 'TRANSITION') {
-      const t1 = setTimeout(() => setPhase('GROWING'), 10000);
+      const t1 = setTimeout(() => setPhase('GROWING'), 2500);
       return () => clearTimeout(t1);
     }
     
@@ -112,13 +112,13 @@ export default function App() {
         x: 30 + Math.random() * 40,
         y: 20 + Math.random() * 60,
         delay: Math.random() * 3,
-        duration: 6 + Math.random() * 5,
+        duration: 10 + Math.random() * 10, // إبطاء الجزيئات لتتناسب مع الوقت الجديد
         size: 1.5 + Math.random() * 3
       }));
       setParticles(newParticles);
       
-      // زيادة وقت النمو ليكون أبطأ (9.5 ثوانٍ)
-      const t2 = setTimeout(() => setPhase('FINISHED'), 9500);
+      // زيادة وقت النمو ليكون أبطأ بكثير (20 ثانية كاملة)
+      const t2 = setTimeout(() => setPhase('FINISHED'), 20000);
       return () => clearTimeout(t2);
     }
     
@@ -162,8 +162,8 @@ export default function App() {
           clip-path: inset(100% 0 0 0);
           filter: brightness(0.2) contrast(1.2);
           transform: scale(0.95);
-          /* زيادة فترة حركة الوردة لتتناسب مع التوقيت الجديد للنمو البطيء */
-          transition: all 9s cubic-bezier(0.25, 1, 0.5, 1);
+          /* زيادة فترة حركة الوردة بشكل كبير (20 ثانية) لتتناسب مع التوقيت الجديد للنمو البطيء جداً */
+          transition: all 20s cubic-bezier(0.25, 1, 0.5, 1);
         }
         .image-reveal.revealed {
           clip-path: inset(0 0 0 0);
