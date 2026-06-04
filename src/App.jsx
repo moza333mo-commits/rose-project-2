@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 
 const COUNTDOWN_SECONDS = 10;
 const TOTAL_MAGICAL_PARTICLES = 35;
-// توليد 40 جزيء دخان متصاعد لتشكيل طبقة دخان كثيفة
-const TOTAL_SMOKE_PARTICLES = 40; 
 
 export default function App() {
   const [hasStarted, setHasStarted] = useState(false);
@@ -11,28 +9,30 @@ export default function App() {
   const [phase, setPhase] = useState('IDLE');
   const [particles, setParticles] = useState([]);
   const [sparks, setSparks] = useState([]);
-  const [smokeParticles, setSmokeParticles] = useState([]);
   
   const audioCtxRef = useRef(null);
   const bgMusicRef = useRef(null);
   const laughAudioRef = useRef(null);
 
   const initAudio = () => {
+    // 1. تشغيل الموسيقى الأساسية
     if (bgMusicRef.current) {
       bgMusicRef.current.volume = 1.0; 
       bgMusicRef.current.play().catch(e => console.log("Audio play blocked:", e));
     }
     
+    // 2. خدعة فك الحظر عن صوت الضحكة: نشغله بصوت 0 ثم نوقفه فوراً ليكون جاهزاً للانطلاق لاحقاً
     if (laughAudioRef.current) {
-      laughAudioRef.current.volume = 0.01;
-      const playPromise = laughAudioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          laughAudioRef.current.pause();
-          laughAudioRef.current.currentTime = 0;
-          laughAudioRef.current.volume = 1.0;
-        }).catch(e => console.log("Laugh unlock blocked:", e));
-      }
+      laughAudioRef.current.volume = 0;
+      laughAudioRef.current.play().then(() => {
+        setTimeout(() => {
+          if (laughAudioRef.current) {
+            laughAudioRef.current.pause();
+            laughAudioRef.current.currentTime = 0;
+            laughAudioRef.current.volume = 1.0; // نجهزه بأعلى صوت
+          }
+        }, 50);
+      }).catch(e => console.log("Laugh unlock blocked:", e));
     }
 
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -121,8 +121,6 @@ export default function App() {
     
     if (phase === 'GROWING') {
       swellMusic(true);
-      
-      // جزيئات سحرية
       const newParticles = Array.from({ length: TOTAL_MAGICAL_PARTICLES }).map((_, i) => ({
         id: i,
         x: 30 + Math.random() * 40,
@@ -132,28 +130,19 @@ export default function App() {
         size: 1.5 + Math.random() * 3
       }));
       setParticles(newParticles);
-
-      // توليد جزيئات الدخان الكثيف المتحرك برمجياً لحجب الصورة
-      const smokes = Array.from({ length: TOTAL_SMOKE_PARTICLES }).map((_, i) => ({
-        id: i,
-        x: 15 + Math.random() * 70, // توزيع عرضي يغطي كامل مساحة الصورة
-        y: 80 + Math.random() * 20, // تبدأ من الأسفل وتتصاعد
-        size: 120 + Math.random() * 100, // أحجام ضخمة لدمج الدخان وتكثيفه
-        delay: Math.random() * 5,
-        duration: 6 + Math.random() * 4,
-        drift: (Math.random() - 0.5) * 60 // حركة يميناً ويساراً أثناء الصعود
-      }));
-      setSmokeParticles(smokes);
       
+      // مدة النمو (15 ثانية) يكون فيها الدخان مغطياً للشاشة
       const t2 = setTimeout(() => setPhase('FINISHED'), 15000);
       return () => clearTimeout(t2);
     }
     
     if (phase === 'FINISHED') {
       swellMusic(false); 
+      // إطلاق صوت الضحكة المدوية بمجرد انتهاء النمو
       if (laughAudioRef.current) {
+        laughAudioRef.current.currentTime = 0;
         laughAudioRef.current.volume = 1.0;
-        laughAudioRef.current.play().catch(e => console.log(e));
+        laughAudioRef.current.play().catch(e => console.log("Laugh error:", e));
       }
     }
   }, [phase]);
@@ -170,6 +159,7 @@ export default function App() {
         preload="auto"
       />
       
+      {/* ملف صوت الضحكة الكوميدية بصوت عالٍ */}
       <audio 
         ref={laughAudioRef} 
         src="https://actions.google.com/sounds/v1/human_voices/comedy_laugh.ogg" 
@@ -195,13 +185,21 @@ export default function App() {
           100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
         }
 
-        /* حركة تصاعد الدخان والتفافه بشكل طبيعي وكثيف */
-        @keyframes smoke-billow-up {
-          0% { transform: translate(0, 0) scale(0.6) rotate(0deg); opacity: 0; }
-          15% { opacity: 0.85; filter: blur(25px); }
-          50% { opacity: 0.95; filter: blur(35px); }
-          85% { opacity: 0.85; filter: blur(40px); }
-          100% { transform: translate(var(--mdrift), -500px) scale(1.5) rotate(180deg); opacity: 0; }
+        /* ------------------------------------------- */
+        /* مؤثرات الضباب السينمائي الداكن والاحترافي */
+        /* ------------------------------------------- */
+        @keyframes cinematic-fog-in {
+          0% { opacity: 0; }
+          5% { opacity: 1; }
+          100% { opacity: 1; }
+        }
+        @keyframes fog-swirl-1 {
+          0% { transform: translate(0%, 0%) rotate(0deg) scale(1); }
+          100% { transform: translate(-5%, -10%) rotate(5deg) scale(1.2); }
+        }
+        @keyframes fog-swirl-2 {
+          0% { transform: translate(0%, 0%) rotate(0deg) scale(1); }
+          100% { transform: translate(5%, -15%) rotate(-5deg) scale(1.3); }
         }
 
         .image-reveal {
@@ -254,9 +252,12 @@ export default function App() {
             onClick={handleBegin}
             className="relative px-12 py-6 overflow-hidden group bg-gradient-to-b from-[#1a1505] to-[#0a0802] border-2 border-[#d4af37]/60 hover:border-[#d4af37] transition-all duration-700 shadow-[0_0_30px_rgba(212,175,55,0.2)] hover:shadow-[0_0_60px_rgba(212,175,55,0.6)] rounded-lg cursor-pointer"
           >
-            <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#fcf4ba] via-[#d4af37] to-[#9e7a17] font-arabic-royal text-3xl md:text-5xl font-bold animate-gentle-pulse">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#d4af37]/30 to-transparent -translate-x-full group-hover:translate-x-full duration-[1500ms] ease-in-out"></div>
+            <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#fcf4ba] via-[#d4af37] to-[#9e7a17] font-arabic-royal text-3xl md:text-5xl font-bold animate-gentle-pulse inline-block px-4 pt-2">
               اِضْغَطْ يَا حُلْوُ
             </span>
+            <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[#d4af37] opacity-50 group-hover:opacity-100 transition-opacity duration-700 rounded-tl-lg"></div>
+            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[#d4af37] opacity-50 group-hover:opacity-100 transition-opacity duration-700 rounded-br-lg"></div>
           </button>
         </div>
       )}
@@ -286,36 +287,53 @@ export default function App() {
         <div className="relative w-full max-w-[600px] h-full flex flex-col items-center justify-center mt-[-10vh]">
           
           <div className="relative flex justify-center w-full h-full items-center">
+            
             <img 
               src="/rose.png" 
               alt="Rose" 
               className={`w-full h-auto max-h-[75vh] object-contain image-reveal ${phase === 'GROWING' || phase === 'FINISHED' ? 'revealed' : ''} ${phase === 'FINISHED' ? 'image-breathe-anim' : ''}`}
             />
-            
-            {/* مؤثر الدخان البرمجي الكثيف والمتحرك فوق صورة الوردة مباشرة ليحجبها كلياً */}
+
+            {/* الضباب السينمائي الكثيف والمظلم - يظهر ويتحرك برمجياً فوق الوردة ويختفي فجأة */}
             {phase === 'GROWING' && (
-              <div className="absolute inset-0 z-40 pointer-events-none overflow-hidden flex justify-center items-center">
-                {smokeParticles.map((smk) => (
-                  <div
-                    key={smk.id}
-                    className="absolute rounded-full pointer-events-none"
-                    style={{
-                      left: `${smk.x}%`,
-                      bottom: `${100 - smk.y}%`,
-                      width: `${smk.size}px`,
-                      height: `${smk.size}px`,
-                      // خليط لوني من تدرجات الدخان الرمادي والأبيض ليعطي كثافة وواقعية للمظهر
-                      background: smk.id % 2 === 0 
-                        ? 'radial-gradient(circle, rgba(220,220,220,0.9) 0%, rgba(140,140,140,0.4) 50%, transparent 70%)'
-                        : 'radial-gradient(circle, rgba(245,245,245,0.85) 0%, rgba(160,160,160,0.35) 50%, transparent 70%)',
-                      '--mdrift': `${smk.drift}px`,
-                      animation: `smoke-billow-up ${smk.duration}s linear infinite`,
-                      animationDelay: `${smk.delay}s`,
-                    }}
-                  />
-                ))}
+              <div 
+                className="absolute inset-[-50%] z-[100] pointer-events-none overflow-hidden"
+                style={{ animation: 'cinematic-fog-in 15s forwards' }}
+              >
+                {/* ضباب عام داكن يغطي الموقع */}
+                <div 
+                  className="absolute inset-0 blur-[40px] opacity-90"
+                  style={{
+                    background: 'radial-gradient(circle at 50% 50%, rgba(15,15,15,1) 0%, rgba(30,30,30,0.8) 50%, transparent 80%)',
+                    animation: 'fog-swirl-1 15s linear infinite alternate'
+                  }}
+                ></div>
+                
+                {/* ضباب كثيف وعميق يتركز في المنتصف تماماً لإخفاء الوردة */}
+                <div 
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] blur-[50px]"
+                  style={{
+                    background: 'radial-gradient(ellipse at center, rgba(5,5,5,1) 20%, rgba(20,20,20,0.9) 50%, transparent 70%)',
+                    animation: 'fog-swirl-2 12s linear infinite alternate'
+                  }}
+                ></div>
               </div>
             )}
+
+            {/* الجزيئات الذهبية */}
+            {phase === 'GROWING' && particles.map((p) => (
+              <div
+                key={p.id}
+                className="absolute rounded-full bg-[#d4af37] blur-[1px] pointer-events-none z-[110]"
+                style={{
+                  left: `${p.x}%`, top: `${p.y}%`,
+                  width: `${p.size}px`, height: `${p.size}px`,
+                  animation: `float-up ${p.duration}s ease-out forwards`,
+                  animationDelay: `${p.delay}s`,
+                  boxShadow: '0 0 15px 4px rgba(212, 175, 55, 0.4)'
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -338,7 +356,7 @@ export default function App() {
               </div>
               
               <h1 className="font-gold-serif font-medium text-6xl md:text-[6rem] uppercase tracking-[0.2em] md:tracking-[0.25em] ml-[0.2em] md:ml-[0.25em] flex mt-2 justify-center">
-                {"Sabah".split('').map((char, i) => (
+                {"Shahd".split('').map((char, i) => (
                   <span 
                     key={i} 
                     className="inline-block opacity-0" 
