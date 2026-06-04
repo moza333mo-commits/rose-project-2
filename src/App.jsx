@@ -192,7 +192,6 @@ export default function App() {
           background: linear-gradient(90deg, transparent, #d4af37, transparent);
         }
 
-        /* تم تعديل هذه الحركة لحل المشكلة، أزلنا الـ filter blur لتجنب اختفاء النص اللامع */
         @keyframes letter-appear {
           0% { opacity: 0; transform: translateY(15px); }
           100% { opacity: 1; transform: translateY(0); }
@@ -309,19 +308,20 @@ export default function App() {
               </div>
               
               <h1 className="font-gold-serif font-medium text-6xl md:text-[6rem] uppercase tracking-[0.2em] md:tracking-[0.25em] ml-[0.2em] md:ml-[0.25em] flex mt-2 justify-center">
-                {/* تم نقل كلاس التدرج الذهبي ليكون على كل حرف بحد ذاته لحل مشكلة اختفاء النص */}
+                {/* تم فصل حركة الظهور (الصندوق الخارجي) عن اللون اللامع (الصندوق الداخلي) لحل المشكلة */}
                 {"Sabah".split('').map((char, i) => (
                   <span 
                     key={i} 
-                    className="inline-block opacity-0 gold-text-gradient" 
-                    style={{ animation: `letter-appear 0.5s ease-out ${1.5 + i * 0.18}s forwards` }}
+                    className="inline-block opacity-0" 
+                    style={{ animation: `letter-appear 0.5s ease-out ${2.0 + i * 0.2}s forwards` }}
                   >
-                    {char === " " ? "\u00A0" : char}
+                    <span className="gold-text-gradient inline-block">{char === " " ? "\u00A0" : char}</span>
                   </span>
                 ))}
               </h1>
               
-              <div className="flex items-center justify-center gap-2 mt-2 opacity-0" style={{ animation: 'fade-in-simple 1s forwards 3.0s' }}>
+              {/* تأخير ظهور الخطوط السفلية لتبدأ بعد اكتمال اسم صباح */}
+              <div className="flex items-center justify-center gap-2 mt-2 opacity-0" style={{ animation: 'fade-in-simple 1s forwards 3.5s' }}>
                 <div className="w-16 md:w-24 gold-line"></div>
                 <span className="text-[#d4af37] text-xs">❖</span>
                 <div className="w-16 md:w-24 gold-line"></div>
@@ -330,10 +330,11 @@ export default function App() {
             </div>
           </div>
 
+          {/* تأخير ظهور توقيع الرسام ليكون المشهد الختامي */}
           <div 
             className="absolute bottom-6 left-6 md:bottom-8 md:left-8 z-40 text-white/80 font-signature text-3xl md:text-4xl opacity-0 pointer-events-none drop-shadow-md"
             style={{ 
-              animation: 'fade-in-simple 2s ease-in forwards 4.0s', 
+              animation: 'fade-in-simple 2s ease-in forwards 4.5s', 
               transform: 'rotate(-5deg)' 
             }}
           >
