@@ -12,12 +12,27 @@ export default function App() {
   
   const audioCtxRef = useRef(null);
   const bgMusicRef = useRef(null);
+  const laughAudioRef = useRef(null); // إضافة مرجع لصوت الضحكة الكوميدية
 
   const initAudio = () => {
     if (bgMusicRef.current) {
       bgMusicRef.current.volume = 1.0; 
       bgMusicRef.current.play().catch(e => console.log("Audio play blocked:", e));
     }
+    
+    // فك حظر صوت الضحكة في الخلفية ليعمل لاحقاً بدون مشاكل
+    if (laughAudioRef.current) {
+      laughAudioRef.current.volume = 0.01;
+      const playPromise = laughAudioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          laughAudioRef.current.pause();
+          laughAudioRef.current.currentTime = 0;
+          laughAudioRef.current.volume = 1.0;
+        }).catch(e => console.log("Laugh unlock blocked:", e));
+      }
+    }
+
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     if (ctx.state === 'suspended') ctx.resume();
     audioCtxRef.current = ctx;
@@ -120,6 +135,11 @@ export default function App() {
     
     if (phase === 'FINISHED') {
       swellMusic(false); 
+      // إطلاق صوت الضحكة العالية فوراً لمجرد اكتمال النمو
+      if (laughAudioRef.current) {
+        laughAudioRef.current.volume = 1.0;
+        laughAudioRef.current.play().catch(e => console.log(e));
+      }
     }
   }, [phase]);
 
@@ -133,6 +153,13 @@ export default function App() {
         src="https://ia903204.us.archive.org/16/items/MoonlightSonata_755/Beethoven-MoonlightSonata.mp3" 
         loop 
         preload="auto"
+      />
+      
+      {/* ملف صوت الضحكة الكوميدية */}
+      <audio 
+        ref={laughAudioRef} 
+        src="https://actions.google.com/sounds/v1/human_voices/comedy_laugh.ogg" 
+        preload="auto" 
       />
 
       <style dangerouslySetInnerHTML={{__html: `
@@ -207,6 +234,26 @@ export default function App() {
           50% { transform: scale(1.05); text-shadow: 0 0 20px rgba(212,175,55,1); }
         }
         .animate-gentle-pulse { animation: gentle-pulse 2.5s ease-in-out infinite; }
+
+        /* ستايلات الدخان الكثيف الذي يغطي الصورة */
+        .thick-smoke-overlay {
+          position: absolute;
+          inset: -50%;
+          background: 
+            radial-gradient(circle at 35% 35%, rgba(180, 180, 180, 1) 20%, transparent 50%),
+            radial-gradient(circle at 65% 65%, rgba(200, 200, 200, 1) 20%, transparent 50%),
+            radial-gradient(circle at 50% 50%, rgba(220, 220, 220, 1) 30%, transparent 60%),
+            radial-gradient(circle at 20% 70%, rgba(150, 150, 150, 1) 25%, transparent 55%),
+            radial-gradient(circle at 80% 30%, rgba(160, 160, 160, 1) 25%, transparent 55%);
+          filter: blur(35px);
+          animation: smoke-billow 15s linear forwards;
+        }
+
+        @keyframes smoke-billow {
+          0% { opacity: 0; transform: scale(0.8) translateY(5%); }
+          3% { opacity: 1; transform: scale(1) translateY(0); }
+          100% { opacity: 1; transform: scale(1.3) translateY(-5%); }
+        }
       `}} />
 
       {!hasStarted && (
@@ -274,6 +321,13 @@ export default function App() {
             )}
           </div>
 
+          {/* طبقة الدخان الكثيف تظهر فقط في مرحلة النمو وتختفي فجأة بعدها */}
+          {phase === 'GROWING' && (
+            <div className="absolute inset-0 z-[100] pointer-events-none overflow-hidden flex justify-center items-center">
+              <div className="thick-smoke-overlay"></div>
+            </div>
+          )}
+
           {phase === 'GROWING' && particles.map((p) => (
             <div
               key={p.id}
@@ -308,8 +362,7 @@ export default function App() {
               </div>
               
               <h1 className="font-gold-serif font-medium text-6xl md:text-[6rem] uppercase tracking-[0.2em] md:tracking-[0.25em] ml-[0.2em] md:ml-[0.25em] flex mt-2 justify-center">
-                {/* تم فصل حركة الظهور (الصندوق الخارجي) عن اللون اللامع (الصندوق الداخلي) لحل المشكلة */}
-                {"shahd".split('').map((char, i) => (
+                {"Sabah".split('').map((char, i) => (
                   <span 
                     key={i} 
                     className="inline-block opacity-0" 
@@ -320,7 +373,6 @@ export default function App() {
                 ))}
               </h1>
               
-              {/* تأخير ظهور الخطوط السفلية لتبدأ بعد اكتمال اسم صباح */}
               <div className="flex items-center justify-center gap-2 mt-2 opacity-0" style={{ animation: 'fade-in-simple 1s forwards 3.5s' }}>
                 <div className="w-16 md:w-24 gold-line"></div>
                 <span className="text-[#d4af37] text-xs">❖</span>
@@ -330,7 +382,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* تأخير ظهور توقيع الرسام ليكون المشهد الختامي */}
           <div 
             className="absolute bottom-6 left-6 md:bottom-8 md:left-8 z-40 text-white/80 font-signature text-3xl md:text-4xl opacity-0 pointer-events-none drop-shadow-md"
             style={{ 
