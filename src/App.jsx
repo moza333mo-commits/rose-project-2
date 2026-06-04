@@ -309,7 +309,7 @@ export default function App() {
               
               <h1 className="font-gold-serif font-medium text-6xl md:text-[6rem] uppercase tracking-[0.2em] md:tracking-[0.25em] ml-[0.2em] md:ml-[0.25em] flex mt-2 justify-center">
                 {/* تم فصل حركة الظهور (الصندوق الخارجي) عن اللون اللامع (الصندوق الداخلي) لحل المشكلة */}
-                {"Sabah".split('').map((char, i) => (
+                {"sinar".split('').map((char, i) => (
                   <span 
                     key={i} 
                     className="inline-block opacity-0" 
