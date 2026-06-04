@@ -114,8 +114,8 @@ export default function App() {
       }));
       setParticles(newParticles);
       
-      // المدة المحددة لنمو الوردة بتدرج ثابت (12 ثانية)
-      const t2 = setTimeout(() => setPhase('FINISHED'), 12000);
+      // إبطاء فترة النمو لتصبح 15 ثانية متزامنة مع الـ CSS
+      const t2 = setTimeout(() => setPhase('FINISHED'), 15000);
       return () => clearTimeout(t2);
     }
     
@@ -137,10 +137,12 @@ export default function App() {
       />
 
       <style dangerouslySetInnerHTML={{__html: `
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Montserrat:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Montserrat:wght@300;400;500&family=Aref+Ruqaa:wght@400;700&display=swap');
 
         .font-gold-serif { font-family: 'Cinzel', serif; }
         .font-gold-sans { font-family: 'Montserrat', sans-serif; }
+        /* الخط العربي الديواني الفاخر للزر */
+        .font-arabic-royal { font-family: 'Aref Ruqaa', serif; }
 
         @keyframes float-up {
           0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0; }
@@ -154,7 +156,6 @@ export default function App() {
           100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
         }
 
-        /* حركة التوهج السحري الذي يلحق بالساق */
         @keyframes scan-up {
           0% { bottom: 0%; opacity: 0; transform: translateX(-50%) scale(0.5); }
           5% { opacity: 1; transform: translateX(-50%) scale(1); }
@@ -166,8 +167,8 @@ export default function App() {
           clip-path: inset(100% 0 0 0);
           filter: brightness(0.2) contrast(1.2);
           transform: scale(0.95);
-          /* هنا السر: linear تعني سرعة نمو ثابتة وواضحة جداً من البداية للنهاية */
-          transition: all 12s linear;
+          /* تسريع ظهور الصورة (brightness و transform) وإبطاء حركة النمو (clip-path) لـ 15 ثانية */
+          transition: filter 3s ease-in, transform 3s ease-out, clip-path 15s linear;
         }
         .image-reveal.revealed {
           clip-path: inset(0 0 0 0);
@@ -198,20 +199,30 @@ export default function App() {
           100% { opacity: 1; filter: blur(0px); transform: translateY(0); }
         }
         .reveal-wrapper { animation: cinematic-reveal-text 4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        /* تأثير النبض الخاص بالزر العربي */
+        @keyframes gentle-pulse {
+          0%, 100% { transform: scale(1); text-shadow: 0 0 10px rgba(212,175,55,0.5); }
+          50% { transform: scale(1.05); text-shadow: 0 0 20px rgba(212,175,55,1); }
+        }
+        .animate-gentle-pulse { animation: gentle-pulse 2.5s ease-in-out infinite; }
       `}} />
 
       {!hasStarted && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm transition-opacity duration-1000">
           <button 
             onClick={handleBegin}
-            className="relative px-16 py-5 overflow-hidden group bg-gradient-to-b from-[#1a1505] to-[#0a0802] border border-[#d4af37]/40 hover:border-[#d4af37] transition-all duration-700 shadow-[0_0_20px_rgba(0,0,0,0.8)] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] rounded-sm cursor-pointer"
+            className="relative px-12 py-6 overflow-hidden group bg-gradient-to-b from-[#1a1505] to-[#0a0802] border-2 border-[#d4af37]/60 hover:border-[#d4af37] transition-all duration-700 shadow-[0_0_30px_rgba(212,175,55,0.2)] hover:shadow-[0_0_60px_rgba(212,175,55,0.6)] rounded-lg cursor-pointer"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#d4af37]/20 to-transparent -translate-x-full group-hover:translate-x-full duration-[1500ms] ease-in-out"></div>
-            <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#fcf4ba] via-[#d4af37] to-[#9e7a17] font-gold-sans tracking-[0.3em] md:tracking-[0.5em] font-medium text-sm md:text-base drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-              اضغط ياحلو
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#d4af37]/30 to-transparent -translate-x-full group-hover:translate-x-full duration-[1500ms] ease-in-out"></div>
+            
+            {/* النص العربي المشكل والمكبر */}
+            <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#fcf4ba] via-[#d4af37] to-[#9e7a17] font-arabic-royal text-3xl md:text-5xl font-bold animate-gentle-pulse inline-block px-4 pt-2">
+              اِضْغَطْ يَا حُلْوُ
             </span>
-            <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#d4af37] opacity-30 group-hover:opacity-100 transition-opacity duration-700"></div>
-            <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[#d4af37] opacity-30 group-hover:opacity-100 transition-opacity duration-700"></div>
+            
+            <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[#d4af37] opacity-50 group-hover:opacity-100 transition-opacity duration-700 rounded-tl-lg"></div>
+            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[#d4af37] opacity-50 group-hover:opacity-100 transition-opacity duration-700 rounded-br-lg"></div>
           </button>
         </div>
       )}
@@ -240,7 +251,6 @@ export default function App() {
       <div className={`absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-[2500ms] ${phase === 'COUNTDOWN' || phase === 'TRANSITION' || phase === 'IDLE' ? 'opacity-0' : 'opacity-100'}`}>
         <div className="relative w-full max-w-[600px] h-full flex flex-col items-center justify-center mt-[-10vh]">
           
-          {/* تم تغليف الصورة لتطبيق تأثير التوهج السحري معها */}
           <div className="relative flex justify-center w-full">
             <img 
               src="/rose.png" 
@@ -251,7 +261,7 @@ export default function App() {
               `}
             />
             
-            {/* التوهج الذهبي السحري الذي يتصاعد مع ساق الوردة */}
+            {/* إبطاء حركة التوهج السحري لتتزامن مع الـ 15 ثانية */}
             {phase === 'GROWING' && (
               <div 
                 className="absolute z-20 pointer-events-none mix-blend-screen"
@@ -260,7 +270,7 @@ export default function App() {
                   width: '180px',
                   height: '24px',
                   background: 'radial-gradient(ellipse at center, rgba(255, 232, 133, 1) 0%, rgba(212, 175, 55, 0.6) 40%, transparent 70%)',
-                  animation: 'scan-up 12s linear forwards',
+                  animation: 'scan-up 15s linear forwards',
                   filter: 'blur(3px)'
                 }}
               />
