@@ -114,7 +114,6 @@ export default function App() {
       }));
       setParticles(newParticles);
       
-      // إبطاء فترة النمو لتصبح 15 ثانية متزامنة مع الـ CSS
       const t2 = setTimeout(() => setPhase('FINISHED'), 15000);
       return () => clearTimeout(t2);
     }
@@ -137,12 +136,13 @@ export default function App() {
       />
 
       <style dangerouslySetInnerHTML={{__html: `
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Montserrat:wght@300;400;500&family=Aref+Ruqaa:wght@400;700&display=swap');
+        /* تم إضافة خط Great Vibes لتوقيع الرسام الكلاسيكي بالأسفل */
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Montserrat:wght@300;400;500&family=Aref+Ruqaa:wght@400;700&family=Great+Vibes&display=swap');
 
         .font-gold-serif { font-family: 'Cinzel', serif; }
         .font-gold-sans { font-family: 'Montserrat', sans-serif; }
-        /* الخط العربي الديواني الفاخر للزر */
         .font-arabic-royal { font-family: 'Aref Ruqaa', serif; }
+        .font-signature { font-family: 'Great Vibes', cursive; }
 
         @keyframes float-up {
           0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0; }
@@ -167,7 +167,6 @@ export default function App() {
           clip-path: inset(100% 0 0 0);
           filter: brightness(0.2) contrast(1.2);
           transform: scale(0.95);
-          /* تسريع ظهور الصورة (brightness و transform) وإبطاء حركة النمو (clip-path) لـ 15 ثانية */
           transition: filter 3s ease-in, transform 3s ease-out, clip-path 15s linear;
         }
         .image-reveal.revealed {
@@ -194,13 +193,17 @@ export default function App() {
           background: linear-gradient(90deg, transparent, #d4af37, transparent);
         }
 
-        @keyframes cinematic-reveal-text {
-          0% { opacity: 0; filter: blur(10px); transform: translateY(20px); }
-          100% { opacity: 1; filter: blur(0px); transform: translateY(0); }
+        /* حركات جديدة لظهور الحروف والتوقيع */
+        @keyframes letter-appear {
+          0% { opacity: 0; filter: blur(5px); transform: translateY(10px) scale(0.9); }
+          100% { opacity: 1; filter: blur(0px); transform: translateY(0) scale(1); }
         }
-        .reveal-wrapper { animation: cinematic-reveal-text 4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
-        /* تأثير النبض الخاص بالزر العربي */
+        @keyframes fade-in-simple {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        
         @keyframes gentle-pulse {
           0%, 100% { transform: scale(1); text-shadow: 0 0 10px rgba(212,175,55,0.5); }
           50% { transform: scale(1.05); text-shadow: 0 0 20px rgba(212,175,55,1); }
@@ -215,12 +218,9 @@ export default function App() {
             className="relative px-12 py-6 overflow-hidden group bg-gradient-to-b from-[#1a1505] to-[#0a0802] border-2 border-[#d4af37]/60 hover:border-[#d4af37] transition-all duration-700 shadow-[0_0_30px_rgba(212,175,55,0.2)] hover:shadow-[0_0_60px_rgba(212,175,55,0.6)] rounded-lg cursor-pointer"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#d4af37]/30 to-transparent -translate-x-full group-hover:translate-x-full duration-[1500ms] ease-in-out"></div>
-            
-            {/* النص العربي المشكل والمكبر */}
             <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#fcf4ba] via-[#d4af37] to-[#9e7a17] font-arabic-royal text-3xl md:text-5xl font-bold animate-gentle-pulse inline-block px-4 pt-2">
               اِضْغَطْ يَا حُلْوُ
             </span>
-            
             <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[#d4af37] opacity-50 group-hover:opacity-100 transition-opacity duration-700 rounded-tl-lg"></div>
             <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[#d4af37] opacity-50 group-hover:opacity-100 transition-opacity duration-700 rounded-br-lg"></div>
           </button>
@@ -261,7 +261,6 @@ export default function App() {
               `}
             />
             
-            {/* إبطاء حركة التوهج السحري لتتزامن مع الـ 15 ثانية */}
             {phase === 'GROWING' && (
               <div 
                 className="absolute z-20 pointer-events-none mix-blend-screen"
@@ -293,27 +292,54 @@ export default function App() {
         </div>
       </div>
 
-      <div className="absolute bottom-[10%] w-full z-30 flex justify-center pointer-events-none">
-        {phase === 'FINISHED' && (
-          <div className="flex flex-col items-center justify-center gap-3 reveal-wrapper">
-            <div className="flex items-center gap-4">
-              <div className="w-8 md:w-12 gold-line"></div>
-              <span className="font-gold-sans font-light text-[0.6rem] md:text-xs tracking-[0.8em] text-[#d4af37] uppercase ml-[0.8em]">
-                For You
-              </span>
-              <div className="w-8 md:w-12 gold-line"></div>
-            </div>
-            <h1 className="font-gold-serif font-medium text-6xl md:text-[6rem] uppercase tracking-[0.2em] md:tracking-[0.25em] ml-[0.2em] md:ml-[0.25em] gold-text-gradient">
-              Sabah
-            </h1>
-            <div className="flex items-center justify-center gap-2 mt-2 opacity-80">
-              <div className="w-16 md:w-24 gold-line"></div>
-              <span className="text-[#d4af37] text-xs">❖</span>
-              <div className="w-16 md:w-24 gold-line"></div>
+      {phase === 'FINISHED' && (
+        <>
+          <div className="absolute bottom-[10%] w-full z-30 flex justify-center pointer-events-none">
+            <div className="flex flex-col items-center justify-center gap-3">
+              
+              <div className="flex items-center gap-4">
+                <div className="w-8 md:w-12 gold-line opacity-0" style={{ animation: 'fade-in-simple 1s forwards 0.5s' }}></div>
+                <span className="font-gold-sans font-light text-[0.6rem] md:text-xs tracking-[0.8em] text-[#d4af37] uppercase ml-[0.8em] flex">
+                  {/* تأثير الطباعة حرفاً بحرف للكلمة الأولى */}
+                  {"For You".split('').map((char, i) => (
+                    <span key={i} className="inline-block opacity-0" style={{ animation: `letter-appear 0.15s forwards ${0.5 + i * 0.1}s` }}>
+                      {char === " " ? "\u00A0" : char}
+                    </span>
+                  ))}
+                </span>
+                <div className="w-8 md:w-12 gold-line opacity-0" style={{ animation: 'fade-in-simple 1s forwards 0.5s' }}></div>
+              </div>
+              
+              <h1 className="font-gold-serif font-medium text-6xl md:text-[6rem] uppercase tracking-[0.2em] md:tracking-[0.25em] ml-[0.2em] md:ml-[0.25em] gold-text-gradient flex mt-2">
+                {/* تأثير الطباعة حرفاً بحرف للكلمة الكبيرة متأخرة قليلاً عن الجملة السابقة */}
+                {"Sabah".split('').map((char, i) => (
+                  <span key={i} className="inline-block opacity-0" style={{ animation: `letter-appear 0.25s forwards ${1.5 + i * 0.2}s` }}>
+                    {char === " " ? "\u00A0" : char}
+                  </span>
+                ))}
+              </h1>
+              
+              <div className="flex items-center justify-center gap-2 mt-2 opacity-0" style={{ animation: 'fade-in-simple 1s forwards 2.8s' }}>
+                <div className="w-16 md:w-24 gold-line"></div>
+                <span className="text-[#d4af37] text-xs">❖</span>
+                <div className="w-16 md:w-24 gold-line"></div>
+              </div>
+
             </div>
           </div>
-        )}
-      </div>
+
+          {/* توقيع الرسام: في الزاوية اليسرى السفلية بخط يدوي ومائل قليلاً */}
+          <div 
+            className="absolute bottom-6 left-6 md:bottom-8 md:left-8 z-40 text-white/80 font-signature text-3xl md:text-4xl opacity-0 pointer-events-none drop-shadow-md"
+            style={{ 
+              animation: 'fade-in-simple 2s ease-in forwards 3.5s', 
+              transform: 'rotate(-5deg)' 
+            }}
+          >
+            from samir
+          </div>
+        </>
+      )}
 
     </div>
   );
