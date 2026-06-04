@@ -15,7 +15,6 @@ export default function App() {
 
   const initAudio = () => {
     if (bgMusicRef.current) {
-      // رفع صوت الموسيقى الأساسي ليكون عالياً بأقصى درجة (100%)
       bgMusicRef.current.volume = 1.0; 
       bgMusicRef.current.play().catch(e => console.log("Audio play blocked:", e));
     }
@@ -24,7 +23,6 @@ export default function App() {
     audioCtxRef.current = ctx;
   };
 
-  // صوت النبضات الفاخرة فقط أثناء العداد
   const playTick = (tensionLevel) => {
     if (!audioCtxRef.current) return;
     const ctx = audioCtxRef.current;
@@ -46,7 +44,6 @@ export default function App() {
 
   const swellMusic = (peak) => {
     if (bgMusicRef.current) {
-      // تثبيت الصوت على أعلى درجة 1.0 في كل الحالات لضمان علو الموسيقى
       const targetVolume = 1.0; 
       const step = 0.01;
       const fadeInterval = setInterval(() => {
@@ -112,13 +109,13 @@ export default function App() {
         x: 30 + Math.random() * 40,
         y: 20 + Math.random() * 60,
         delay: Math.random() * 3,
-        duration: 10 + Math.random() * 10, // إبطاء الجزيئات لتتناسب مع الوقت الجديد
+        duration: 8 + Math.random() * 6, 
         size: 1.5 + Math.random() * 3
       }));
       setParticles(newParticles);
       
-      // زيادة وقت النمو ليكون أبطأ بكثير (20 ثانية كاملة)
-      const t2 = setTimeout(() => setPhase('FINISHED'), 20000);
+      // المدة المحددة لنمو الوردة بتدرج ثابت (12 ثانية)
+      const t2 = setTimeout(() => setPhase('FINISHED'), 12000);
       return () => clearTimeout(t2);
     }
     
@@ -130,7 +127,6 @@ export default function App() {
   const isAnticipation = phase === 'COUNTDOWN' && timeLeft <= 3;
 
   return (
-    // تم تغيير لون الخلفية إلى bg-black ليتطابق مع خلفية الوردة تماماً دون أي حواف
     <div className="relative w-screen h-screen bg-black overflow-hidden flex flex-col items-center justify-center selection:bg-transparent">
       
       <audio 
@@ -158,12 +154,20 @@ export default function App() {
           100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
         }
 
+        /* حركة التوهج السحري الذي يلحق بالساق */
+        @keyframes scan-up {
+          0% { bottom: 0%; opacity: 0; transform: translateX(-50%) scale(0.5); }
+          5% { opacity: 1; transform: translateX(-50%) scale(1); }
+          95% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+          100% { bottom: 100%; opacity: 0; transform: translateX(-50%) scale(0.5); }
+        }
+
         .image-reveal {
           clip-path: inset(100% 0 0 0);
           filter: brightness(0.2) contrast(1.2);
           transform: scale(0.95);
-          /* زيادة فترة حركة الوردة بشكل كبير (20 ثانية) لتتناسب مع التوقيت الجديد للنمو البطيء جداً */
-          transition: all 20s cubic-bezier(0.25, 1, 0.5, 1);
+          /* هنا السر: linear تعني سرعة نمو ثابتة وواضحة جداً من البداية للنهاية */
+          transition: all 12s linear;
         }
         .image-reveal.revealed {
           clip-path: inset(0 0 0 0);
@@ -196,34 +200,23 @@ export default function App() {
         .reveal-wrapper { animation: cinematic-reveal-text 4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       `}} />
 
-      {/* شاشة البداية مع الزر الفاخر */}
       {!hasStarted && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm transition-opacity duration-1000">
           <button 
             onClick={handleBegin}
             className="relative px-16 py-5 overflow-hidden group bg-gradient-to-b from-[#1a1505] to-[#0a0802] border border-[#d4af37]/40 hover:border-[#d4af37] transition-all duration-700 shadow-[0_0_20px_rgba(0,0,0,0.8)] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] rounded-sm cursor-pointer"
           >
-            {/* تأثير اللمعان المتحرك */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#d4af37]/20 to-transparent -translate-x-full group-hover:translate-x-full duration-[1500ms] ease-in-out"></div>
-            
-            {/* النص الذهبي الفاخر */}
             <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#fcf4ba] via-[#d4af37] to-[#9e7a17] font-gold-sans tracking-[0.3em] md:tracking-[0.5em] font-medium text-sm md:text-base drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               اضغط ياحلو
             </span>
-            
-            {/* زخارف الزوايا الفاخرة */}
             <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#d4af37] opacity-30 group-hover:opacity-100 transition-opacity duration-700"></div>
             <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[#d4af37] opacity-30 group-hover:opacity-100 transition-opacity duration-700"></div>
           </button>
         </div>
       )}
 
-      {/* العداد التنازلي الساحر */}
-      <div 
-        className={`absolute z-20 flex flex-col items-center justify-center transition-all duration-[3000ms] ease-out
-          ${phase === 'COUNTDOWN' ? 'opacity-100 scale-100' : 'opacity-0 scale-110 pointer-events-none'}
-        `}
-      >
+      <div className={`absolute z-20 flex flex-col items-center justify-center transition-all duration-[3000ms] ease-out ${phase === 'COUNTDOWN' ? 'opacity-100 scale-100' : 'opacity-0 scale-110 pointer-events-none'}`}>
         <div className="relative flex items-center justify-center">
           {sparks.map(spark => (
             <div
@@ -238,31 +231,41 @@ export default function App() {
               }}
             />
           ))}
-          <div 
-            className={`text-[12rem] md:text-[22rem] leading-none font-gold-serif font-light gold-text-gradient tabular-nums tracking-tighter
-              transition-all duration-1000 ${isAnticipation ? 'scale-105 drop-shadow-[0_0_40px_rgba(212,175,55,0.4)]' : ''}
-            `}
-          >
+          <div className={`text-[12rem] md:text-[22rem] leading-none font-gold-serif font-light gold-text-gradient tabular-nums tracking-tighter transition-all duration-1000 ${isAnticipation ? 'scale-105 drop-shadow-[0_0_40px_rgba(212,175,55,0.4)]' : ''}`}>
             {timeLeft}
           </div>
         </div>
       </div>
 
-      {/* الصورة الواقعية (الوردة) */}
-      <div 
-        className={`absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-[2500ms]
-          ${phase === 'COUNTDOWN' || phase === 'TRANSITION' || phase === 'IDLE' ? 'opacity-0' : 'opacity-100'}
-        `}
-      >
+      <div className={`absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-[2500ms] ${phase === 'COUNTDOWN' || phase === 'TRANSITION' || phase === 'IDLE' ? 'opacity-0' : 'opacity-100'}`}>
         <div className="relative w-full max-w-[600px] h-full flex flex-col items-center justify-center mt-[-10vh]">
-          <img 
-            src="/rose.png" 
-            alt="Rose" 
-            className={`w-full h-auto max-h-[75vh] object-contain image-reveal drop-shadow-[0_20px_40px_rgba(0,0,0,0.9)]
-              ${phase === 'GROWING' || phase === 'FINISHED' ? 'revealed' : ''}
-              ${phase === 'FINISHED' ? 'image-breathe-anim' : ''}
-            `}
-          />
+          
+          {/* تم تغليف الصورة لتطبيق تأثير التوهج السحري معها */}
+          <div className="relative flex justify-center w-full">
+            <img 
+              src="/rose.png" 
+              alt="Rose" 
+              className={`w-full h-auto max-h-[75vh] object-contain image-reveal drop-shadow-[0_20px_40px_rgba(0,0,0,0.9)]
+                ${phase === 'GROWING' || phase === 'FINISHED' ? 'revealed' : ''}
+                ${phase === 'FINISHED' ? 'image-breathe-anim' : ''}
+              `}
+            />
+            
+            {/* التوهج الذهبي السحري الذي يتصاعد مع ساق الوردة */}
+            {phase === 'GROWING' && (
+              <div 
+                className="absolute z-20 pointer-events-none mix-blend-screen"
+                style={{
+                  left: '50%',
+                  width: '180px',
+                  height: '24px',
+                  background: 'radial-gradient(ellipse at center, rgba(255, 232, 133, 1) 0%, rgba(212, 175, 55, 0.6) 40%, transparent 70%)',
+                  animation: 'scan-up 12s linear forwards',
+                  filter: 'blur(3px)'
+                }}
+              />
+            )}
+          </div>
 
           {phase === 'GROWING' && particles.map((p) => (
             <div
@@ -280,11 +283,9 @@ export default function App() {
         </div>
       </div>
 
-      {/* النص الذهبي الفاخر المطابق للصورة */}
       <div className="absolute bottom-[10%] w-full z-30 flex justify-center pointer-events-none">
         {phase === 'FINISHED' && (
           <div className="flex flex-col items-center justify-center gap-3 reveal-wrapper">
-            
             <div className="flex items-center gap-4">
               <div className="w-8 md:w-12 gold-line"></div>
               <span className="font-gold-sans font-light text-[0.6rem] md:text-xs tracking-[0.8em] text-[#d4af37] uppercase ml-[0.8em]">
@@ -292,17 +293,14 @@ export default function App() {
               </span>
               <div className="w-8 md:w-12 gold-line"></div>
             </div>
-            
             <h1 className="font-gold-serif font-medium text-6xl md:text-[6rem] uppercase tracking-[0.2em] md:tracking-[0.25em] ml-[0.2em] md:ml-[0.25em] gold-text-gradient">
               Sabah
             </h1>
-            
             <div className="flex items-center justify-center gap-2 mt-2 opacity-80">
               <div className="w-16 md:w-24 gold-line"></div>
               <span className="text-[#d4af37] text-xs">❖</span>
               <div className="w-16 md:w-24 gold-line"></div>
             </div>
-
           </div>
         )}
       </div>
