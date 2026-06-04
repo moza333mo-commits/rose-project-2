@@ -101,7 +101,7 @@ export default function App() {
     }
     
     if (phase === 'TRANSITION') {
-      const t1 = setTimeout(() => setPhase('GROWING'), 2500);
+      const t1 = setTimeout(() => setPhase('GROWING'), 10000);
       return () => clearTimeout(t1);
     }
     
