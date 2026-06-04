@@ -136,7 +136,6 @@ export default function App() {
       />
 
       <style dangerouslySetInnerHTML={{__html: `
-        /* تم إضافة خط Great Vibes لتوقيع الرسام الكلاسيكي بالأسفل */
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Montserrat:wght@300;400;500&family=Aref+Ruqaa:wght@400;700&family=Great+Vibes&display=swap');
 
         .font-gold-serif { font-family: 'Cinzel', serif; }
@@ -193,10 +192,10 @@ export default function App() {
           background: linear-gradient(90deg, transparent, #d4af37, transparent);
         }
 
-        /* حركات جديدة لظهور الحروف والتوقيع */
+        /* تم تعديل هذه الحركة لحل المشكلة، أزلنا الـ filter blur لتجنب اختفاء النص اللامع */
         @keyframes letter-appear {
-          0% { opacity: 0; filter: blur(5px); transform: translateY(10px) scale(0.9); }
-          100% { opacity: 1; filter: blur(0px); transform: translateY(0) scale(1); }
+          0% { opacity: 0; transform: translateY(15px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
         
         @keyframes fade-in-simple {
@@ -300,9 +299,8 @@ export default function App() {
               <div className="flex items-center gap-4">
                 <div className="w-8 md:w-12 gold-line opacity-0" style={{ animation: 'fade-in-simple 1s forwards 0.5s' }}></div>
                 <span className="font-gold-sans font-light text-[0.6rem] md:text-xs tracking-[0.8em] text-[#d4af37] uppercase ml-[0.8em] flex">
-                  {/* تأثير الطباعة حرفاً بحرف للكلمة الأولى */}
                   {"For You".split('').map((char, i) => (
-                    <span key={i} className="inline-block opacity-0" style={{ animation: `letter-appear 0.15s forwards ${0.5 + i * 0.1}s` }}>
+                    <span key={i} className="inline-block opacity-0" style={{ animation: `letter-appear 0.4s ease-out ${0.5 + i * 0.15}s forwards` }}>
                       {char === " " ? "\u00A0" : char}
                     </span>
                   ))}
@@ -310,16 +308,20 @@ export default function App() {
                 <div className="w-8 md:w-12 gold-line opacity-0" style={{ animation: 'fade-in-simple 1s forwards 0.5s' }}></div>
               </div>
               
-              <h1 className="font-gold-serif font-medium text-6xl md:text-[6rem] uppercase tracking-[0.2em] md:tracking-[0.25em] ml-[0.2em] md:ml-[0.25em] gold-text-gradient flex mt-2">
-                {/* تأثير الطباعة حرفاً بحرف للكلمة الكبيرة متأخرة قليلاً عن الجملة السابقة */}
+              <h1 className="font-gold-serif font-medium text-6xl md:text-[6rem] uppercase tracking-[0.2em] md:tracking-[0.25em] ml-[0.2em] md:ml-[0.25em] flex mt-2 justify-center">
+                {/* تم نقل كلاس التدرج الذهبي ليكون على كل حرف بحد ذاته لحل مشكلة اختفاء النص */}
                 {"Sabah".split('').map((char, i) => (
-                  <span key={i} className="inline-block opacity-0" style={{ animation: `letter-appear 0.25s forwards ${1.5 + i * 0.2}s` }}>
+                  <span 
+                    key={i} 
+                    className="inline-block opacity-0 gold-text-gradient" 
+                    style={{ animation: `letter-appear 0.5s ease-out ${1.5 + i * 0.18}s forwards` }}
+                  >
                     {char === " " ? "\u00A0" : char}
                   </span>
                 ))}
               </h1>
               
-              <div className="flex items-center justify-center gap-2 mt-2 opacity-0" style={{ animation: 'fade-in-simple 1s forwards 2.8s' }}>
+              <div className="flex items-center justify-center gap-2 mt-2 opacity-0" style={{ animation: 'fade-in-simple 1s forwards 3.0s' }}>
                 <div className="w-16 md:w-24 gold-line"></div>
                 <span className="text-[#d4af37] text-xs">❖</span>
                 <div className="w-16 md:w-24 gold-line"></div>
@@ -328,11 +330,10 @@ export default function App() {
             </div>
           </div>
 
-          {/* توقيع الرسام: في الزاوية اليسرى السفلية بخط يدوي ومائل قليلاً */}
           <div 
             className="absolute bottom-6 left-6 md:bottom-8 md:left-8 z-40 text-white/80 font-signature text-3xl md:text-4xl opacity-0 pointer-events-none drop-shadow-md"
             style={{ 
-              animation: 'fade-in-simple 2s ease-in forwards 3.5s', 
+              animation: 'fade-in-simple 2s ease-in forwards 4.0s', 
               transform: 'rotate(-5deg)' 
             }}
           >
